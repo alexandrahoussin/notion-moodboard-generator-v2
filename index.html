@@ -1,339 +1,622 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Moodboard Couture</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #fff;
-    color: #2d3748;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  h1 {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 0;
-  }
-  p.subtitle {
-    text-align: center;
-    color: #718096;
-    margin-top: 5px;
-    font-size: 14px;
-  }
-  .header {
-    background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-  }
-  .controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: transform 0.2s;
-  }
-  button:hover { transform: translateY(-2px); }
-  .btn-upload { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-  .btn-text { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-  .btn-shuffle { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-  .btn-download { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-  .btn-clear { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #fff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Moodboard Couture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-  .options { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-  label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: #4a5568; }
-  input[type="color"], select {
-    width: 100%;
-    height: 45px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 8px;
-  }
-  select { cursor: pointer; background: white; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-  #moodboard {
-    position: relative;
-    width: 100%;
-    height: 700px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    background-color: #f5f5f5;
-  }
-  .image-item {
-    position: absolute;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    cursor: grab;
-    transition: box-shadow 0.2s;
-  }
-  .image-item:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-  .border-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255,255,255,0.9);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  .text-item {
-    position: absolute;
-    cursor: grab;
-    padding: 10px;
-    background: rgba(255,255,255,0.8);
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  .text-item input {
-    border: none;
-    background: transparent;
-    font-size: 24px;
-    color: #000;
-    font-weight: 600;
-    outline: none;
-    min-width: 150px;
-  }
-  .empty-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #a0aec0;
-    font-size: 18px;
-  }
-</style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(102,126,234,0.3);
+        }
+
+        .btn-text {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 10px rgba(245,87,108,0.3);
+        }
+
+        .btn-shuffle {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 2px 10px rgba(79,172,254,0.3);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            box-shadow: 0 2px 10px rgba(67,233,123,0.3);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            box-shadow: 0 2px 10px rgba(250,112,154,0.3);
+        }
+
+        .settings {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .setting-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-group input[type="color"] {
+            width: 100%;
+            height: 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .setting-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #moodboard {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            background-color: #f5f5f5;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #a0aec0;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            stroke-width: 1.5;
+        }
+
+        .empty-state p {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .image-item {
+            position: absolute;
+            cursor: grab;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            transition: box-shadow 0.2s;
+        }
+
+        .image-item:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .image-item.dragging {
+            cursor: grabbing;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .border-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .text-item {
+            position: absolute;
+            cursor: grab;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .text-item.dragging {
+            cursor: grabbing;
+        }
+
+        .text-item input {
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            color: #000000;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            outline: none;
+            min-width: 150px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>Générateur de Moodboard</h1>
+            <p>Créez votre tableau d'inspiration couture</p>
+        </div>
 
-<div class="header">
-  <h1>Générateur de Moodboard</h1>
-  <p class="subtitle">Créez votre tableau d'inspiration couture</p>
-</div>
+        <div class="controls">
+            <button class="btn btn-upload" onclick="triggerFileInput()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Ajouter des images
+            </button>
+            <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
 
-<div class="controls">
-  <button class="btn-upload" id="uploadBtn">📤 Ajouter des images</button>
-  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-  <button class="btn-text" id="addTextBtn">🔤 Ajouter du texte</button>
-  <button class="btn-shuffle" id="shuffleBtn">🔀 Mélanger</button>
-  <button class="btn-download" id="downloadBtn">💾 Télécharger</button>
-  <button class="btn-clear" id="clearBtn">🗑️ Vider</button>
-</div>
+            <button class="btn btn-text" onclick="addText()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                    <line x1="9" y1="20" x2="15" y2="20"></line>
+                    <line x1="12" y1="4" x2="12" y2="20"></line>
+                </svg>
+                Ajouter du texte
+            </button>
 
-<div class="options">
-  <div style="flex:1; min-width:200px;">
-    <label>Couleur de fond</label>
-    <input type="color" id="bgColor" value="#f5f5f5">
-  </div>
-  <div style="flex:1; min-width:200px;">
-    <label>Style de disposition</label>
-    <select id="layoutSelect">
-      <option value="pinterest">Pinterest</option>
-      <option value="collage">Collage</option>
-    </select>
-  </div>
-</div>
+            <button class="btn btn-shuffle" onclick="shuffleLayout()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 3 21 3 21 8"></polyline>
+                    <line x1="4" y1="20" x2="21" y2="3"></line>
+                    <polyline points="21 16 21 21 16 21"></polyline>
+                    <line x1="15" y1="15" x2="21" y2="21"></line>
+                    <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+                Mélanger
+            </button>
 
-<div id="moodboard">
-  <div class="empty-hint">Ajoutez des images pour commencer</div>
-</div>
+            <button class="btn btn-download" onclick="downloadMoodboard()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Télécharger
+            </button>
 
-<script>
-let images = [];
-let texts = [];
-let dragged = null;
-let layout = "pinterest";
-let bgColor = "#f5f5f5";
+            <button class="btn btn-clear" onclick="clearMoodboard()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Vider
+            </button>
+        </div>
 
-const moodboard = document.getElementById('moodboard');
-const fileInput = document.getElementById('fileInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const addTextBtn = document.getElementById('addTextBtn');
-const shuffleBtn = document.getElementById('shuffleBtn');
-const clearBtn = document.getElementById('clearBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const layoutSelect = document.getElementById('layoutSelect');
-const bgColorInput = document.getElementById('bgColor');
+        <div class="settings">
+            <div class="setting-group">
+                <label>Couleur de fond</label>
+                <input type="color" id="bgColor" value="#f5f5f5" onchange="updateBackground()">
+            </div>
 
-uploadBtn.onclick = () => fileInput.click();
-fileInput.onchange = e => {
-  Array.from(e.target.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const id = Date.now() + Math.random();
-      images.push({ id, src: ev.target.result, border: false });
-      render();
-    };
-    reader.readAsDataURL(file);
-  });
-};
+            <div class="setting-group">
+                <label>Style de disposition</label>
+                <select id="layoutSelect" onchange="changeLayout()">
+                    <option value="pinterest">Pinterest</option>
+                    <option value="collage">Collage</option>
+                </select>
+            </div>
+        </div>
 
-addTextBtn.onclick = () => {
-  const id = Date.now();
-  texts.push({ id, x: 100, y: 100, content: "Votre texte" });
-  render();
-};
+        <div id="moodboard">
+            <div class="empty-state" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p>Ajoutez des images pour commencer</p>
+            </div>
+        </div>
+    </div>
 
-clearBtn.onclick = () => {
-  images = [];
-  texts = [];
-  render();
-};
+    <script>
+        var images = [];
+        var textElements = [];
+        var draggedElement = null;
+        var offsetX = 0;
+        var offsetY = 0;
+        var layout = 'pinterest';
 
-layoutSelect.onchange = e => {
-  layout = e.target.value;
-  render();
-};
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
 
-bgColorInput.oninput = e => {
-  bgColor = e.target.value;
-  moodboard.style.backgroundColor = bgColor;
-};
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            var files = Array.prototype.slice.call(e.target.files);
+            
+            for (var i = 0; i < files.length; i++) {
+                (function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        var img = {
+                            id: Date.now() + Math.random(),
+                            src: event.target.result,
+                            border: false,
+                            x: 100,
+                            y: 100,
+                            width: 200,
+                            height: 200,
+                            rotation: 0
+                        };
+                        images.push(img);
+                        applyLayout();
+                        renderMoodboard();
+                    };
+                    reader.readAsDataURL(file);
+                })(files[i]);
+            }
+            e.target.value = '';
+        });
 
-shuffleBtn.onclick = () => render();
+        function generatePinterestLayout() {
+            var columns = 3;
+            var gap = 15;
+            var columnWidth = 280;
+            
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                var col = i % columns;
+                var row = Math.floor(i / columns);
+                var randomHeight = 200 + Math.random() * 150;
+                
+                img.x = col * (columnWidth + gap) + 20;
+                img.y = row * 250 + 20;
+                img.width = columnWidth;
+                img.height = randomHeight;
+                img.rotation = 0;
+            }
+        }
 
-downloadBtn.onclick = () => {
-  html2canvas(moodboard, { backgroundColor: bgColor, scale: 2 }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'moodboard-couture.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-};
+        function generateCollageLayout() {
+            var containerWidth = 900;
+            var containerHeight = 600;
+            var positions = [];
+            
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                var x, y, width, height, rotation, attempts = 0;
+                var overlapping = true;
+                
+                while (overlapping && attempts < 50) {
+                    width = 150 + Math.random() * 150;
+                    height = 150 + Math.random() * 150;
+                    x = Math.random() * (containerWidth - width - 40) + 20;
+                    y = Math.random() * (containerHeight - height - 40) + 20;
+                    rotation = (Math.random() - 0.5) * 20;
+                    
+                    overlapping = false;
+                    for (var j = 0; j < positions.length; j++) {
+                        var pos = positions[j];
+                        if (!(x + width < pos.x || x > pos.x + pos.width ||
+                              y + height < pos.y || y > pos.y + pos.height)) {
+                            overlapping = true;
+                            break;
+                        }
+                    }
+                    
+                    attempts++;
+                }
+                
+                if (!overlapping || attempts === 50) {
+                    positions.push({ x: x, y: y, width: width, height: height });
+                    img.x = x;
+                    img.y = y;
+                    img.width = width;
+                    img.height = height;
+                    img.rotation = rotation;
+                }
+            }
+        }
 
-function generatePinterestLayout(imgs) {
-  const columns = 3, gap = 15, colWidth = 280;
-  return imgs.map((img, idx) => {
-    const col = idx % columns, row = Math.floor(idx / columns);
-    const randomHeight = 200 + Math.random() * 150;
-    return {
-      ...img,
-      style: {
-        left: `${col * (colWidth + gap) + 20}px`,
-        top: `${row * 250 + 20}px`,
-        width: `${colWidth}px`,
-        height: `${randomHeight}px`,
-        transform: 'rotate(0deg)'
-      }
-    };
-  });
-}
+        function applyLayout() {
+            if (layout === 'pinterest') {
+                generatePinterestLayout();
+            } else {
+                generateCollageLayout();
+            }
+        }
 
-function generateCollageLayout(imgs) {
-  const w = moodboard.clientWidth, h = moodboard.clientHeight;
-  const positions = [];
-  return imgs.map(img => {
-    let x, y, width, height, rotation, overlap, tries = 0;
-    do {
-      width = 150 + Math.random() * 150;
-      height = 150 + Math.random() * 150;
-      x = Math.random() * (w - width - 40) + 20;
-      y = Math.random() * (h - height - 40) + 20;
-      rotation = (Math.random() - 0.5) * 20;
-      overlap = positions.some(p => !(x + width < p.x || x > p.x + p.width || y + height < p.y || y > p.y + p.height));
-      tries++;
-    } while(overlap && tries < 50);
-    positions.push({x,y,width,height});
-    return {...img, style: {left:`${x}px`,top:`${y}px`,width:`${width}px`,height:`${height}px`,transform:`rotate(${rotation}deg)`}};
-  });
-}
+        function renderMoodboard() {
+            var moodboard = document.getElementById('moodboard');
+            var emptyState = document.getElementById('emptyState');
+            
+            if (images.length === 0 && textElements.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+            }
+            
+            var existingItems = moodboard.querySelectorAll('.image-item, .text-item');
+            for (var i = 0; i < existingItems.length; i++) {
+                existingItems[i].remove();
+            }
+            
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                var div = document.createElement('div');
+                div.className = 'image-item';
+                div.style.left = img.x + 'px';
+                div.style.top = img.y + 'px';
+                div.style.width = img.width + 'px';
+                div.style.height = img.height + 'px';
+                if (img.rotation) {
+                    div.style.transform = 'rotate(' + img.rotation + 'deg)';
+                }
+                if (img.border) {
+                    div.style.border = '8px solid white';
+                }
+                
+                var imgEl = document.createElement('img');
+                imgEl.src = img.src;
+                div.appendChild(imgEl);
+                
+                var btn = document.createElement('button');
+                btn.className = 'border-btn';
+                btn.textContent = img.border ? '✓ Bordure' : '+ Bordure';
+                btn.setAttribute('data-id', img.id);
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    var btnId = parseFloat(this.getAttribute('data-id'));
+                    toggleBorder(btnId);
+                };
+                div.appendChild(btn);
+                
+                div.setAttribute('data-id', img.id);
+                div.setAttribute('data-type', 'image');
+                div.onmousedown = startDragHandler;
+                
+                moodboard.appendChild(div);
+            }
+            
+            for (var i = 0; i < textElements.length; i++) {
+                var txt = textElements[i];
+                var div = document.createElement('div');
+                div.className = 'text-item';
+                div.style.left = txt.x + 'px';
+                div.style.top = txt.y + 'px';
+                
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.value = txt.content;
+                input.setAttribute('data-id', txt.id);
+                input.oninput = function(e) {
+                    var inputId = parseFloat(this.getAttribute('data-id'));
+                    for (var j = 0; j < textElements.length; j++) {
+                        if (textElements[j].id === inputId) {
+                            textElements[j].content = e.target.value;
+                            break;
+                        }
+                    }
+                };
+                div.appendChild(input);
+                
+                div.setAttribute('data-id', txt.id);
+                div.setAttribute('data-type', 'text');
+                div.onmousedown = startDragHandler;
+                
+                moodboard.appendChild(div);
+            }
+        }
 
-function render() {
-  moodboard.innerHTML = '';
-  moodboard.style.backgroundColor = bgColor;
-  if (images.length === 0 && texts.length === 0) {
-    moodboard.innerHTML = '<div class="empty-hint">Ajoutez des images pour commencer</div>';
-    return;
-  }
-  const arranged = layout === 'pinterest' ? generatePinterestLayout(images) : generateCollageLayout(images);
-  arranged.forEach(img => {
-    const div = document.createElement('div');
-    div.className = 'image-item';
-    Object.assign(div.style, img.style);
-    if (img.border) div.style.border = '8px solid white';
-    const image = document.createElement('img');
-    image.src = img.src;
-    image.style.width = '100%';
-    image.style.height = '100%';
-    image.style.objectFit = 'cover';
-    div.appendChild(image);
-    const btn = document.createElement('button');
-    btn.className = 'border-btn';
-    btn.textContent = img.border ? '✓ Bordure' : '+ Bordure';
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      img.border = !img.border;
-      render();
-    };
-    div.appendChild(btn);
-    div.onmousedown = e => startDrag(e, img, 'image');
-    moodboard.appendChild(div);
-  });
+        function startDragHandler(e) {
+            var itemId = parseFloat(this.getAttribute('data-id'));
+            var itemType = this.getAttribute('data-type');
+            
+            var item = null;
+            if (itemType === 'image') {
+                for (var i = 0; i < images.length; i++) {
+                    if (images[i].id === itemId) {
+                        item = images[i];
+                        break;
+                    }
+                }
+            } else {
+                for (var i = 0; i < textElements.length; i++) {
+                    if (textElements[i].id === itemId) {
+                        item = textElements[i];
+                        break;
+                    }
+                }
+            }
+            
+            if (item) {
+                draggedElement = { item: item, type: itemType };
+                var moodboard = document.getElementById('moodboard');
+                var rect = moodboard.getBoundingClientRect();
+                offsetX = e.clientX - rect.left - item.x;
+                offsetY = e.clientY - rect.top - item.y;
+                this.classList.add('dragging');
+            }
+        }
 
-  texts.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'text-item';
-    div.style.left = t.x + 'px';
-    div.style.top = t.y + 'px';
-    const input = document.createElement('input');
-    input.value = t.content;
-    input.oninput = e => t.content = e.target.value;
-    div.appendChild(input);
-    div.onmousedown = e => startDrag(e, t, 'text');
-    moodboard.appendChild(div);
-  });
-}
+        document.addEventListener('mousemove', function(e) {
+            if (!draggedElement) return;
+            
+            var moodboard = document.getElementById('moodboard');
+            var rect = moodboard.getBoundingClientRect();
+            var x = e.clientX - rect.left - offsetX;
+            var y = e.clientY - rect.top - offsetY;
+            
+            draggedElement.item.x = x;
+            draggedElement.item.y = y;
+            
+            renderMoodboard();
+        });
 
-function startDrag(e, item, type) {
-  e.preventDefault();
-  dragged = { item, type, offsetX: e.offsetX, offsetY: e.offsetY };
-}
+        document.addEventListener('mouseup', function() {
+            if (draggedElement) {
+                var dragging = document.querySelector('.dragging');
+                if (dragging) dragging.classList.remove('dragging');
+                draggedElement = null;
+            }
+        });
 
-document.onmousemove = e => {
-  if (!dragged) return;
-  const rect = moodboard.getBoundingClientRect();
-  const x = e.clientX - rect.left - dragged.offsetX;
-  const y = e.clientY - rect.top - dragged.offsetY;
-  if (dragged.type === 'image') {
-    dragged.item.style.left = x + 'px';
-    dragged.item.style.top = y + 'px';
-  } else {
-    dragged.item.x = x;
-    dragged.item.y = y;
-  }
-  render();
-};
+        function toggleBorder(id) {
+            for (var i = 0; i < images.length; i++) {
+                if (images[i].id === id) {
+                    images[i].border = !images[i].border;
+                    renderMoodboard();
+                    break;
+                }
+            }
+        }
 
-document.onmouseup = () => dragged = null;
+        function addText() {
+            var txt = {
+                id: Date.now(),
+                content: 'Votre texte',
+                x: 100,
+                y: 100
+            };
+            textElements.push(txt);
+            renderMoodboard();
+        }
 
-render();
-</script>
+        function shuffleLayout() {
+            applyLayout();
+            renderMoodboard();
+        }
 
+        function clearMoodboard() {
+            images = [];
+            textElements = [];
+            renderMoodboard();
+        }
+
+        function updateBackground() {
+            var color = document.getElementById('bgColor').value;
+            document.getElementById('moodboard').style.backgroundColor = color;
+        }
+
+        function changeLayout() {
+            layout = document.getElementById('layoutSelect').value;
+            applyLayout();
+            renderMoodboard();
+        }
+
+        function downloadMoodboard() {
+            var moodboard = document.getElementById('moodboard');
+            var bgColor = document.getElementById('bgColor').value;
+            
+            html2canvas(moodboard, {
+                backgroundColor: bgColor,
+                scale: 2
+            }).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'moodboard-couture.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
 </body>
 </html>
