@@ -204,15 +204,93 @@
             font-weight: 500;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             font-family: 'Poppins', sans-serif;
+            z-index: 10;
+        }
+
+        .rotate-handle {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .rotate-handle:active {
+            cursor: grabbing;
+        }
+
+        .border-menu {
+            position: absolute;
+            top: 40px;
+            right: 8px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 20;
+            min-width: 200px;
+        }
+
+        .border-menu-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .border-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .border-option:hover {
+            background: #f7fafc;
+        }
+
+        .border-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .color-picker-wrapper {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .color-picker-label {
+            font-size: 11px;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            width: 100%;
+            height: 35px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
         .text-item {
             position: absolute;
             cursor: grab;
             padding: 10px;
-            background: rgba(255,255,255,0.8);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .text-item.dragging {
@@ -228,6 +306,7 @@
             font-weight: 600;
             outline: none;
             min-width: 150px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
         }
 
         .hidden {
@@ -300,8 +379,8 @@
             <div class="setting-group">
                 <label>Style de disposition</label>
                 <select id="layoutSelect" onchange="changeLayout()">
+                    <option value="collage" selected>Collage</option>
                     <option value="pinterest">Pinterest</option>
-                    <option value="collage">Collage</option>
                 </select>
             </div>
         </div>
@@ -324,7 +403,7 @@
         var draggedElement = null;
         var offsetX = 0;
         var offsetY = 0;
-        var layout = 'pinterest';
+        var layout = 'collage';
 
         function triggerFileInput() {
             document.getElementById('fileInput').click();
@@ -341,6 +420,8 @@
                             id: Date.now() + Math.random(),
                             src: event.target.result,
                             border: false,
+                            borderStyle: 'simple',
+                            borderColor: '#ffffff',
                             x: 100,
                             y: 100,
                             width: 200,
@@ -451,8 +532,21 @@
                 if (img.rotation) {
                     div.style.transform = 'rotate(' + img.rotation + 'deg)';
                 }
+                
                 if (img.border) {
-                    div.style.border = '8px solid white';
+                    if (img.borderStyle === 'simple') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                    } else if (img.borderStyle === 'double') {
+                        div.style.border = '8px double ' + img.borderColor;
+                    } else if (img.borderStyle === 'shadow') {
+                        div.style.boxShadow = '0 0 0 8px ' + img.borderColor + ', 0 8px 25px rgba(0,0,0,0.3)';
+                    } else if (img.borderStyle === 'torn') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                        div.style.clipPath = 'polygon(0% 2%, 2% 0%, 5% 3%, 8% 1%, 12% 4%, 15% 0%, 18% 3%, 22% 1%, 25% 4%, 28% 2%, 32% 5%, 35% 1%, 38% 4%, 42% 2%, 45% 5%, 48% 1%, 52% 4%, 55% 2%, 58% 5%, 62% 1%, 65% 4%, 68% 2%, 72% 5%, 75% 1%, 78% 4%, 82% 2%, 85% 5%, 88% 1%, 92% 4%, 95% 2%, 98% 5%, 100% 2%, 98% 8%, 100% 12%, 97% 15%, 100% 18%, 98% 22%, 100% 25%, 97% 28%, 100% 32%, 98% 35%, 100% 38%, 97% 42%, 100% 45%, 98% 48%, 100% 52%, 97% 55%, 100% 58%, 98% 62%, 100% 65%, 97% 68%, 100% 72%, 98% 75%, 100% 78%, 97% 82%, 100% 85%, 98% 88%, 100% 92%, 97% 95%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 97%, 85% 100%, 82% 98%, 78% 100%, 75% 97%, 72% 100%, 68% 98%, 65% 100%, 62% 97%, 58% 100%, 55% 98%, 52% 100%, 48% 97%, 45% 100%, 42% 98%, 38% 100%, 35% 97%, 32% 100%, 28% 98%, 25% 100%, 22% 97%, 18% 100%, 15% 98%, 12% 100%, 8% 97%, 5% 100%, 2% 98%, 0% 95%, 2% 92%, 0% 88%, 3% 85%, 0% 82%, 2% 78%, 0% 75%, 3% 72%, 0% 68%, 2% 65%, 0% 62%, 3% 58%, 0% 55%, 2% 52%, 0% 48%, 3% 45%, 0% 42%, 2% 38%, 0% 35%, 3% 32%, 0% 28%, 2% 25%, 0% 22%, 3% 18%, 0% 15%, 2% 12%, 0% 8%, 3% 5%)';
+                    } else if (img.borderStyle === 'vintage') {
+                        div.style.border = '12px solid ' + img.borderColor;
+                        div.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3)';
+                    }
                 }
                 
                 var imgEl = document.createElement('img');
@@ -461,14 +555,26 @@
                 
                 var btn = document.createElement('button');
                 btn.className = 'border-btn';
-                btn.textContent = img.border ? '✓ Bordure' : '+ Bordure';
+                btn.textContent = img.border ? '⚙️ Bordure' : '+ Bordure';
                 btn.setAttribute('data-id', img.id);
                 btn.onclick = function(e) {
                     e.stopPropagation();
                     var btnId = parseFloat(this.getAttribute('data-id'));
-                    toggleBorder(btnId);
+                    toggleBorderMenu(btnId, e);
                 };
                 div.appendChild(btn);
+                
+                if (layout === 'collage') {
+                    var rotateHandle = document.createElement('div');
+                    rotateHandle.className = 'rotate-handle';
+                    rotateHandle.innerHTML = '↻';
+                    rotateHandle.setAttribute('data-id', img.id);
+                    rotateHandle.onmousedown = function(e) {
+                        e.stopPropagation();
+                        startRotate(e, parseFloat(this.getAttribute('data-id')));
+                    };
+                    div.appendChild(rotateHandle);
+                }
                 
                 div.setAttribute('data-id', img.id);
                 div.setAttribute('data-type', 'image');
