@@ -1,391 +1,339 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Trash2, Download, Shuffle, Type, ImageIcon } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moodboard Couture</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #fff;
+    color: #2d3748;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 0;
+  }
+  p.subtitle {
+    text-align: center;
+    color: #718096;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  .header {
+    background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.2s;
+  }
+  button:hover { transform: translateY(-2px); }
+  .btn-upload { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .btn-text { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .btn-shuffle { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .btn-download { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+  .btn-clear { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #fff; }
 
-const MoodboardGenerator = () => {
-  const [images, setImages] = useState([]);
-  const [backgroundColor, setBackgroundColor] = useState('#f5f5f5');
-  const [layout, setLayout] = useState('pinterest');
-  const [showTextInput, setShowTextInput] = useState(false);
-  const [textElements, setTextElements] = useState([]);
-  const [draggedItem, setDraggedItem] = useState(null);
-  const moodboardRef = useRef(null);
-  const fileInputRef = useRef(null);
+  .options { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+  label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: #4a5568; }
+  input[type="color"], select {
+    width: 100%;
+    height: 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px;
+  }
+  select { cursor: pointer; background: white; }
 
-  const generatePinterestLayout = (imgArray) => {
-    const columns = 3;
-    const gap = 15;
-    const columnWidth = 280;
-    
-    return imgArray.map((img, idx) => {
-      const col = idx % columns;
-      const row = Math.floor(idx / columns);
-      const randomHeight = 200 + Math.random() * 150;
-      
-      return {
-        ...img,
-        style: {
-          position: 'absolute',
-          left: `${col * (columnWidth + gap) + 20}px`,
-          top: `${row * 250 + 20}px`,
-          width: `${columnWidth}px`,
-          height: `${randomHeight}px`,
-          objectFit: 'cover'
-        }
-      };
-    });
-  };
+  #moodboard {
+    position: relative;
+    width: 100%;
+    height: 700px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    background-color: #f5f5f5;
+  }
+  .image-item {
+    position: absolute;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    cursor: grab;
+    transition: box-shadow 0.2s;
+  }
+  .image-item:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+  .border-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .text-item {
+    position: absolute;
+    cursor: grab;
+    padding: 10px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .text-item input {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #000;
+    font-weight: 600;
+    outline: none;
+    min-width: 150px;
+  }
+  .empty-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #a0aec0;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
 
-  const generateCollageLayout = (imgArray) => {
-    const containerWidth = 900;
-    const containerHeight = 600;
-    const positions = [];
-    
-    return imgArray.map((img, idx) => {
-      let x, y, width, height, rotation, attempts = 0;
-      let overlapping = true;
-      
-      while (overlapping && attempts < 50) {
-        width = 150 + Math.random() * 150;
-        height = 150 + Math.random() * 150;
-        x = Math.random() * (containerWidth - width - 40) + 20;
-        y = Math.random() * (containerHeight - height - 40) + 20;
-        rotation = (Math.random() - 0.5) * 20;
-        
-        overlapping = positions.some(pos => {
-          return !(x + width < pos.x || x > pos.x + pos.width ||
-                   y + height < pos.y || y > pos.y + pos.height);
-        });
-        
-        attempts++;
-      }
-      
-      if (!overlapping || attempts === 50) {
-        positions.push({ x, y, width, height });
-      }
-      
-      return {
-        ...img,
-        style: {
-          position: 'absolute',
-          left: `${x}px`,
-          top: `${y}px`,
-          width: `${width}px`,
-          height: `${height}px`,
-          transform: `rotate(${rotation}deg)`,
-          objectFit: 'cover'
-        }
-      };
-    });
-  };
+<div class="header">
+  <h1>Générateur de Moodboard</h1>
+  <p class="subtitle">Créez votre tableau d'inspiration couture</p>
+</div>
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImage = {
-          id: Date.now() + Math.random(),
-          src: event.target.result,
-          border: false,
-          borderColor: '#000000'
-        };
-        setImages(prev => {
-          const updated = [...prev, newImage];
-          return layout === 'pinterest' ? generatePinterestLayout(updated) : generateCollageLayout(updated);
-        });
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+<div class="controls">
+  <button class="btn-upload" id="uploadBtn">📤 Ajouter des images</button>
+  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+  <button class="btn-text" id="addTextBtn">🔤 Ajouter du texte</button>
+  <button class="btn-shuffle" id="shuffleBtn">🔀 Mélanger</button>
+  <button class="btn-download" id="downloadBtn">💾 Télécharger</button>
+  <button class="btn-clear" id="clearBtn">🗑️ Vider</button>
+</div>
 
-  const handleDragStart = (e, item, type = 'image') => {
-    setDraggedItem({ item, type, offsetX: e.clientX, offsetY: e.clientY });
-  };
+<div class="options">
+  <div style="flex:1; min-width:200px;">
+    <label>Couleur de fond</label>
+    <input type="color" id="bgColor" value="#f5f5f5">
+  </div>
+  <div style="flex:1; min-width:200px;">
+    <label>Style de disposition</label>
+    <select id="layoutSelect">
+      <option value="pinterest">Pinterest</option>
+      <option value="collage">Collage</option>
+    </select>
+  </div>
+</div>
 
-  const handleDrag = (e) => {
-    if (!draggedItem || !moodboardRef.current) return;
-    
-    e.preventDefault();
-    const rect = moodboardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    if (draggedItem.type === 'image') {
-      setImages(prev => prev.map(img => 
-        img.id === draggedItem.item.id 
-          ? { ...img, style: { ...img.style, left: `${x - 75}px`, top: `${y - 75}px` } }
-          : img
-      ));
-    } else {
-      setTextElements(prev => prev.map(txt => 
-        txt.id === draggedItem.item.id 
-          ? { ...txt, x: x - 50, y: y - 10 }
-          : txt
-      ));
-    }
-  };
+<div id="moodboard">
+  <div class="empty-hint">Ajoutez des images pour commencer</div>
+</div>
 
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-  };
+<script>
+let images = [];
+let texts = [];
+let dragged = null;
+let layout = "pinterest";
+let bgColor = "#f5f5f5";
 
-  const shuffleLayout = () => {
-    setImages(prev => layout === 'pinterest' ? generatePinterestLayout(prev) : generateCollageLayout(prev));
-  };
+const moodboard = document.getElementById('moodboard');
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const addTextBtn = document.getElementById('addTextBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const clearBtn = document.getElementById('clearBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const layoutSelect = document.getElementById('layoutSelect');
+const bgColorInput = document.getElementById('bgColor');
 
-  const clearMoodboard = () => {
-    setImages([]);
-    setTextElements([]);
-  };
-
-  const toggleBorder = (id) => {
-    setImages(prev => prev.map(img => 
-      img.id === id ? { ...img, border: !img.border } : img
-    ));
-  };
-
-  const downloadMoodboard = () => {
-    if (!moodboardRef.current) return;
-    
-    import('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js').then(module => {
-      const html2canvas = module.default;
-      html2canvas(moodboardRef.current, {
-        backgroundColor: backgroundColor,
-        scale: 2
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'moodboard-couture.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
-    });
-  };
-
-  const addText = () => {
-    const newText = {
-      id: Date.now(),
-      content: 'Votre texte',
-      x: 100,
-      y: 100,
-      fontSize: 24,
-      color: '#000000',
-      fontFamily: 'Poppins'
+uploadBtn.onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  Array.from(e.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const id = Date.now() + Math.random();
+      images.push({ id, src: ev.target.result, border: false });
+      render();
     };
-    setTextElements(prev => [...prev, newText]);
-    setShowTextInput(false);
-  };
-
-  useEffect(() => {
-    if (images.length > 0) {
-      setImages(prev => layout === 'pinterest' ? generatePinterestLayout(prev) : generateCollageLayout(prev));
-    }
-  }, [layout]);
-
-  return (
-    <div style={{ fontFamily: 'Poppins, sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap');
-          * { box-sizing: border-box; }
-        `}
-      </style>
-
-      <div style={{ background: 'linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%)', borderRadius: '20px', padding: '30px', marginBottom: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-        <h1 style={{ margin: '0 0 10px 0', fontSize: '32px', fontWeight: '600', color: '#2d3748', textAlign: 'center' }}>
-          Générateur de Moodboard
-        </h1>
-        <p style={{ margin: '0', color: '#718096', textAlign: 'center', fontSize: '14px' }}>
-          Créez votre tableau d'inspiration couture
-        </p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 20px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'transform 0.2s', boxShadow: '0 2px 10px rgba(102,126,234,0.3)' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Upload size={18} />
-          Ajouter des images
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ display: 'none' }}
-        />
-
-        <button
-          onClick={addText}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 20px', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'transform 0.2s', boxShadow: '0 2px 10px rgba(245,87,108,0.3)' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Type size={18} />
-          Ajouter du texte
-        </button>
-
-        <button
-          onClick={shuffleLayout}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 20px', background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'transform 0.2s', boxShadow: '0 2px 10px rgba(79,172,254,0.3)' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Shuffle size={18} />
-          Mélanger
-        </button>
-
-        <button
-          onClick={downloadMoodboard}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 20px', background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'transform 0.2s', boxShadow: '0 2px 10px rgba(67,233,123,0.3)' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Download size={18} />
-          Télécharger
-        </button>
-
-        <button
-          onClick={clearMoodboard}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 20px', background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'transform 0.2s', boxShadow: '0 2px 10px rgba(250,112,154,0.3)' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Trash2 size={18} />
-          Vider
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', color: '#4a5568', fontSize: '14px', fontWeight: '500' }}>
-            Couleur de fond
-          </label>
-          <input
-            type="color"
-            value={backgroundColor}
-            onChange={(e) => setBackgroundColor(e.target.value)}
-            style={{ width: '100%', height: '45px', border: '2px solid #e2e8f0', borderRadius: '10px', cursor: 'pointer' }}
-          />
-        </div>
-
-        <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', color: '#4a5568', fontSize: '14px', fontWeight: '500' }}>
-            Style de disposition
-          </label>
-          <select
-            value={layout}
-            onChange={(e) => setLayout(e.target.value)}
-            style={{ width: '100%', padding: '12px', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', cursor: 'pointer', backgroundColor: 'white' }}
-          >
-            <option value="pinterest">Pinterest</option>
-            <option value="collage">Collage</option>
-          </select>
-        </div>
-      </div>
-
-      <div
-        ref={moodboardRef}
-        onMouseMove={handleDrag}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '700px',
-          backgroundColor: backgroundColor,
-          borderRadius: '20px',
-          overflow: 'hidden',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-          cursor: draggedItem ? 'grabbing' : 'default'
-        }}
-      >
-        {images.length === 0 && textElements.length === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#a0aec0' }}>
-            <ImageIcon size={64} strokeWidth={1.5} />
-            <p style={{ marginTop: '20px', fontSize: '18px' }}>Ajoutez des images pour commencer</p>
-          </div>
-        )}
-
-        {images.map((img) => (
-          <div
-            key={img.id}
-            onMouseDown={(e) => handleDragStart(e, img)}
-            style={{
-              ...img.style,
-              cursor: 'grab',
-              border: img.border ? '8px solid white' : 'none',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-              borderRadius: '8px',
-              transition: 'box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)'}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'}
-          >
-            <img
-              src={img.src}
-              alt="moodboard"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px', pointerEvents: 'none' }}
-            />
-            <button
-              onClick={() => toggleBorder(img.id)}
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                background: 'rgba(255,255,255,0.9)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '6px 10px',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '500',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-              }}
-            >
-              {img.border ? '✓ Bordure' : '+ Bordure'}
-            </button>
-          </div>
-        ))}
-
-        {textElements.map((txt) => (
-          <div
-            key={txt.id}
-            onMouseDown={(e) => handleDragStart(e, txt, 'text')}
-            style={{
-              position: 'absolute',
-              left: `${txt.x}px`,
-              top: `${txt.y}px`,
-              cursor: 'grab',
-              padding: '10px',
-              background: 'rgba(255,255,255,0.8)',
-              borderRadius: '8px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-            }}
-          >
-            <input
-              type="text"
-              value={txt.content}
-              onChange={(e) => setTextElements(prev => prev.map(t => t.id === txt.id ? { ...t, content: e.target.value } : t))}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontSize: `${txt.fontSize}px`,
-                color: txt.color,
-                fontFamily: txt.fontFamily,
-                fontWeight: '600',
-                outline: 'none',
-                minWidth: '150px'
-              }}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    reader.readAsDataURL(file);
+  });
 };
 
-export default MoodboardGenerator;
+addTextBtn.onclick = () => {
+  const id = Date.now();
+  texts.push({ id, x: 100, y: 100, content: "Votre texte" });
+  render();
+};
+
+clearBtn.onclick = () => {
+  images = [];
+  texts = [];
+  render();
+};
+
+layoutSelect.onchange = e => {
+  layout = e.target.value;
+  render();
+};
+
+bgColorInput.oninput = e => {
+  bgColor = e.target.value;
+  moodboard.style.backgroundColor = bgColor;
+};
+
+shuffleBtn.onclick = () => render();
+
+downloadBtn.onclick = () => {
+  html2canvas(moodboard, { backgroundColor: bgColor, scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'moodboard-couture.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+};
+
+function generatePinterestLayout(imgs) {
+  const columns = 3, gap = 15, colWidth = 280;
+  return imgs.map((img, idx) => {
+    const col = idx % columns, row = Math.floor(idx / columns);
+    const randomHeight = 200 + Math.random() * 150;
+    return {
+      ...img,
+      style: {
+        left: `${col * (colWidth + gap) + 20}px`,
+        top: `${row * 250 + 20}px`,
+        width: `${colWidth}px`,
+        height: `${randomHeight}px`,
+        transform: 'rotate(0deg)'
+      }
+    };
+  });
+}
+
+function generateCollageLayout(imgs) {
+  const w = moodboard.clientWidth, h = moodboard.clientHeight;
+  const positions = [];
+  return imgs.map(img => {
+    let x, y, width, height, rotation, overlap, tries = 0;
+    do {
+      width = 150 + Math.random() * 150;
+      height = 150 + Math.random() * 150;
+      x = Math.random() * (w - width - 40) + 20;
+      y = Math.random() * (h - height - 40) + 20;
+      rotation = (Math.random() - 0.5) * 20;
+      overlap = positions.some(p => !(x + width < p.x || x > p.x + p.width || y + height < p.y || y > p.y + p.height));
+      tries++;
+    } while(overlap && tries < 50);
+    positions.push({x,y,width,height});
+    return {...img, style: {left:`${x}px`,top:`${y}px`,width:`${width}px`,height:`${height}px`,transform:`rotate(${rotation}deg)`}};
+  });
+}
+
+function render() {
+  moodboard.innerHTML = '';
+  moodboard.style.backgroundColor = bgColor;
+  if (images.length === 0 && texts.length === 0) {
+    moodboard.innerHTML = '<div class="empty-hint">Ajoutez des images pour commencer</div>';
+    return;
+  }
+  const arranged = layout === 'pinterest' ? generatePinterestLayout(images) : generateCollageLayout(images);
+  arranged.forEach(img => {
+    const div = document.createElement('div');
+    div.className = 'image-item';
+    Object.assign(div.style, img.style);
+    if (img.border) div.style.border = '8px solid white';
+    const image = document.createElement('img');
+    image.src = img.src;
+    image.style.width = '100%';
+    image.style.height = '100%';
+    image.style.objectFit = 'cover';
+    div.appendChild(image);
+    const btn = document.createElement('button');
+    btn.className = 'border-btn';
+    btn.textContent = img.border ? '✓ Bordure' : '+ Bordure';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      img.border = !img.border;
+      render();
+    };
+    div.appendChild(btn);
+    div.onmousedown = e => startDrag(e, img, 'image');
+    moodboard.appendChild(div);
+  });
+
+  texts.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'text-item';
+    div.style.left = t.x + 'px';
+    div.style.top = t.y + 'px';
+    const input = document.createElement('input');
+    input.value = t.content;
+    input.oninput = e => t.content = e.target.value;
+    div.appendChild(input);
+    div.onmousedown = e => startDrag(e, t, 'text');
+    moodboard.appendChild(div);
+  });
+}
+
+function startDrag(e, item, type) {
+  e.preventDefault();
+  dragged = { item, type, offsetX: e.offsetX, offsetY: e.offsetY };
+}
+
+document.onmousemove = e => {
+  if (!dragged) return;
+  const rect = moodboard.getBoundingClientRect();
+  const x = e.clientX - rect.left - dragged.offsetX;
+  const y = e.clientY - rect.top - dragged.offsetY;
+  if (dragged.type === 'image') {
+    dragged.item.style.left = x + 'px';
+    dragged.item.style.top = y + 'px';
+  } else {
+    dragged.item.x = x;
+    dragged.item.y = y;
+  }
+  render();
+};
+
+document.onmouseup = () => dragged = null;
+
+render();
+</script>
+
+</body>
+</html>
