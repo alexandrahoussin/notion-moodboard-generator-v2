@@ -222,6 +222,7 @@
             justify-content: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             z-index: 10;
+            font-size: 18px;
         }
 
         .rotate-handle:active {
@@ -404,6 +405,10 @@
         var offsetX = 0;
         var offsetY = 0;
         var layout = 'collage';
+        var rotatingImage = null;
+        var startAngle = 0;
+        var centerX = 0;
+        var centerY = 0;
 
         function triggerFileInput() {
             document.getElementById('fileInput').click();
@@ -413,27 +418,26 @@
             var files = Array.prototype.slice.call(e.target.files);
             
             for (var i = 0; i < files.length; i++) {
-                (function(file) {
-                    var reader = new FileReader();
-                    reader.onload = function(event) {
-                        var img = {
-                            id: Date.now() + Math.random(),
-                            src: event.target.result,
-                            border: false,
-                            borderStyle: 'simple',
-                            borderColor: '#ffffff',
-                            x: 100,
-                            y: 100,
-                            width: 200,
-                            height: 200,
-                            rotation: 0
-                        };
-                        images.push(img);
-                        applyLayout();
-                        renderMoodboard();
+                var file = files[i];
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var img = {
+                        id: Date.now() + Math.random(),
+                        src: event.target.result,
+                        border: false,
+                        borderStyle: 'simple',
+                        borderColor: '#ffffff',
+                        x: 100,
+                        y: 100,
+                        width: 200,
+                        height: 200,
+                        rotation: 0
                     };
-                    reader.readAsDataURL(file);
-                })(files[i]);
+                    images.push(img);
+                    applyLayout();
+                    renderMoodboard();
+                };
+                reader.readAsDataURL(file);
             }
             e.target.value = '';
         });
@@ -477,174 +481,83 @@
                     overlapping = false;
                     for (var j = 0; j < positions.length; j++) {
                         var pos = positions[j];
-                        if (!(x + width < pos.x || x > pos.x + pos.width ||
-                              y + height < pos.y || y > pos.y + pos.height)) {
-                            overlapping = true;
+                        if (targetImg.border) {
+                var colorWrapper = document.createElement('div');
+                colorWrapper.className = 'color-picker-wrapper';
+                
+                var colorLabel = document.createElement('div');
+                colorLabel.className = 'color-picker-label';
+                colorLabel.textContent = 'Couleur de bordure';
+                colorWrapper.appendChild(colorLabel);
+                
+                var colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = targetImg.borderColor || '#ffffff';
+                colorInput.setAttribute('data-img-id', id);
+                colorInput.onchange = function() {
+                    var imgId = parseFloat(this.getAttribute('data-img-id'));
+                    for (var k = 0; k < images.length; k++) {
+                        if (images[k].id === imgId) {
+                            images[k].borderColor = this.value;
+                            renderMoodboard();
                             break;
                         }
                     }
-                    
-                    attempts++;
-                }
-                
-                if (!overlapping || attempts === 50) {
-                    positions.push({ x: x, y: y, width: width, height: height });
-                    img.x = x;
-                    img.y = y;
-                    img.width = width;
-                    img.height = height;
-                    img.rotation = rotation;
-                }
-            }
-        }
-
-        function applyLayout() {
-            if (layout === 'pinterest') {
-                generatePinterestLayout();
-            } else {
-                generateCollageLayout();
-            }
-        }
-
-        function renderMoodboard() {
-            var moodboard = document.getElementById('moodboard');
-            var emptyState = document.getElementById('emptyState');
-            
-            if (images.length === 0 && textElements.length === 0) {
-                emptyState.style.display = 'flex';
-            } else {
-                emptyState.style.display = 'none';
+                };
+                colorWrapper.appendChild(colorInput);
+                menu.appendChild(colorWrapper);
             }
             
-            var existingItems = moodboard.querySelectorAll('.image-item, .text-item');
-            for (var i = 0; i < existingItems.length; i++) {
-                existingItems[i].remove();
+            var imageItem = buttonElement.closest('.image-item');
+            imageItem.appendChild(menu);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.border-menu') && !e.target.closest('.border-btn')) {
+                var menus = document.querySelectorAll('.border-menu');
+                for (var i = 0; i < menus.length; i++) {
+                    menus[i].remove();
+                }
             }
+        });
+
+        function startRotate(e, imgId) {
+            e.preventDefault();
+            e.stopPropagation();
             
             for (var i = 0; i < images.length; i++) {
-                var img = images[i];
-                var div = document.createElement('div');
-                div.className = 'image-item';
-                div.style.left = img.x + 'px';
-                div.style.top = img.y + 'px';
-                div.style.width = img.width + 'px';
-                div.style.height = img.height + 'px';
-                if (img.rotation) {
-                    div.style.transform = 'rotate(' + img.rotation + 'deg)';
+                if (images[i].id === imgId) {
+                    rotatingImage = images[i];
+                    centerX = rotatingImage.x + rotatingImage.width / 2;
+                    centerY = rotatingImage.y + rotatingImage.height / 2;
+                    
+                    var moodboard = document.getElementById('moodboard');
+                    var rect = moodboard.getBoundingClientRect();
+                    var mouseX = e.clientX - rect.left;
+                    var mouseY = e.clientY - rect.top;
+                    
+                    startAngle = Math.atan2(mouseY - centerY, mouseX - centerX) * 180 / Math.PI;
+                    startAngle -= rotatingImage.rotation || 0;
+                    
+                    break;
                 }
-                
-                if (img.border) {
-                    if (img.borderStyle === 'simple') {
-                        div.style.border = '8px solid ' + img.borderColor;
-                    } else if (img.borderStyle === 'double') {
-                        div.style.border = '8px double ' + img.borderColor;
-                    } else if (img.borderStyle === 'shadow') {
-                        div.style.boxShadow = '0 0 0 8px ' + img.borderColor + ', 0 8px 25px rgba(0,0,0,0.3)';
-                    } else if (img.borderStyle === 'torn') {
-                        div.style.border = '8px solid ' + img.borderColor;
-                        div.style.clipPath = 'polygon(0% 2%, 2% 0%, 5% 3%, 8% 1%, 12% 4%, 15% 0%, 18% 3%, 22% 1%, 25% 4%, 28% 2%, 32% 5%, 35% 1%, 38% 4%, 42% 2%, 45% 5%, 48% 1%, 52% 4%, 55% 2%, 58% 5%, 62% 1%, 65% 4%, 68% 2%, 72% 5%, 75% 1%, 78% 4%, 82% 2%, 85% 5%, 88% 1%, 92% 4%, 95% 2%, 98% 5%, 100% 2%, 98% 8%, 100% 12%, 97% 15%, 100% 18%, 98% 22%, 100% 25%, 97% 28%, 100% 32%, 98% 35%, 100% 38%, 97% 42%, 100% 45%, 98% 48%, 100% 52%, 97% 55%, 100% 58%, 98% 62%, 100% 65%, 97% 68%, 100% 72%, 98% 75%, 100% 78%, 97% 82%, 100% 85%, 98% 88%, 100% 92%, 97% 95%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 97%, 85% 100%, 82% 98%, 78% 100%, 75% 97%, 72% 100%, 68% 98%, 65% 100%, 62% 97%, 58% 100%, 55% 98%, 52% 100%, 48% 97%, 45% 100%, 42% 98%, 38% 100%, 35% 97%, 32% 100%, 28% 98%, 25% 100%, 22% 97%, 18% 100%, 15% 98%, 12% 100%, 8% 97%, 5% 100%, 2% 98%, 0% 95%, 2% 92%, 0% 88%, 3% 85%, 0% 82%, 2% 78%, 0% 75%, 3% 72%, 0% 68%, 2% 65%, 0% 62%, 3% 58%, 0% 55%, 2% 52%, 0% 48%, 3% 45%, 0% 42%, 2% 38%, 0% 35%, 3% 32%, 0% 28%, 2% 25%, 0% 22%, 3% 18%, 0% 15%, 2% 12%, 0% 8%, 3% 5%)';
-                    } else if (img.borderStyle === 'vintage') {
-                        div.style.border = '12px solid ' + img.borderColor;
-                        div.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3)';
-                    }
-                }
-                
-                var imgEl = document.createElement('img');
-                imgEl.src = img.src;
-                div.appendChild(imgEl);
-                
-                var btn = document.createElement('button');
-                btn.className = 'border-btn';
-                btn.textContent = img.border ? '⚙️ Bordure' : '+ Bordure';
-                btn.setAttribute('data-id', img.id);
-                btn.onclick = function(e) {
-                    e.stopPropagation();
-                    var btnId = parseFloat(this.getAttribute('data-id'));
-                    toggleBorderMenu(btnId, e);
-                };
-                div.appendChild(btn);
-                
-                if (layout === 'collage') {
-                    var rotateHandle = document.createElement('div');
-                    rotateHandle.className = 'rotate-handle';
-                    rotateHandle.innerHTML = '↻';
-                    rotateHandle.setAttribute('data-id', img.id);
-                    rotateHandle.onmousedown = function(e) {
-                        e.stopPropagation();
-                        startRotate(e, parseFloat(this.getAttribute('data-id')));
-                    };
-                    div.appendChild(rotateHandle);
-                }
-                
-                div.setAttribute('data-id', img.id);
-                div.setAttribute('data-type', 'image');
-                div.onmousedown = startDragHandler;
-                
-                moodboard.appendChild(div);
-            }
-            
-            for (var i = 0; i < textElements.length; i++) {
-                var txt = textElements[i];
-                var div = document.createElement('div');
-                div.className = 'text-item';
-                div.style.left = txt.x + 'px';
-                div.style.top = txt.y + 'px';
-                
-                var input = document.createElement('input');
-                input.type = 'text';
-                input.value = txt.content;
-                input.setAttribute('data-id', txt.id);
-                input.oninput = function(e) {
-                    var inputId = parseFloat(this.getAttribute('data-id'));
-                    for (var j = 0; j < textElements.length; j++) {
-                        if (textElements[j].id === inputId) {
-                            textElements[j].content = e.target.value;
-                            break;
-                        }
-                    }
-                };
-                div.appendChild(input);
-                
-                div.setAttribute('data-id', txt.id);
-                div.setAttribute('data-type', 'text');
-                div.onmousedown = startDragHandler;
-                
-                moodboard.appendChild(div);
-            }
-        }
-
-        function startDragHandler(e) {
-            var itemId = parseFloat(this.getAttribute('data-id'));
-            var itemType = this.getAttribute('data-type');
-            
-            var item = null;
-            if (itemType === 'image') {
-                for (var i = 0; i < images.length; i++) {
-                    if (images[i].id === itemId) {
-                        item = images[i];
-                        break;
-                    }
-                }
-            } else {
-                for (var i = 0; i < textElements.length; i++) {
-                    if (textElements[i].id === itemId) {
-                        item = textElements[i];
-                        break;
-                    }
-                }
-            }
-            
-            if (item) {
-                draggedElement = { item: item, type: itemType };
-                var moodboard = document.getElementById('moodboard');
-                var rect = moodboard.getBoundingClientRect();
-                offsetX = e.clientX - rect.left - item.x;
-                offsetY = e.clientY - rect.top - item.y;
-                this.classList.add('dragging');
             }
         }
 
         document.addEventListener('mousemove', function(e) {
+            if (rotatingImage) {
+                var moodboard = document.getElementById('moodboard');
+                var rect = moodboard.getBoundingClientRect();
+                var mouseX = e.clientX - rect.left;
+                var mouseY = e.clientY - rect.top;
+                
+                var angle = Math.atan2(mouseY - centerY, mouseX - centerX) * 180 / Math.PI;
+                rotatingImage.rotation = angle - startAngle;
+                
+                renderMoodboard();
+                return;
+            }
+            
             if (!draggedElement) return;
             
             var moodboard = document.getElementById('moodboard');
@@ -659,22 +572,16 @@
         });
 
         document.addEventListener('mouseup', function() {
+            if (rotatingImage) {
+                rotatingImage = null;
+            }
+            
             if (draggedElement) {
                 var dragging = document.querySelector('.dragging');
                 if (dragging) dragging.classList.remove('dragging');
                 draggedElement = null;
             }
         });
-
-        function toggleBorder(id) {
-            for (var i = 0; i < images.length; i++) {
-                if (images[i].id === id) {
-                    images[i].border = !images[i].border;
-                    renderMoodboard();
-                    break;
-                }
-            }
-        }
 
         function addText() {
             var txt = {
@@ -725,4 +632,266 @@
         }
     </script>
 </body>
-</html>
+</html> (!(x + width < pos.x || x > pos.x + pos.width ||
+                              y + height < pos.y || y > pos.y + pos.height)) {
+                            overlapping = true;
+                            break;
+                        }
+                    }
+                    
+                    attempts++;
+                }
+                
+                if (!overlapping || attempts === 50) {
+                    positions.push({ x: x, y: y, width: width, height: height });
+                    img.x = x;
+                    img.y = y;
+                    img.width = width;
+                    img.height = height;
+                    img.rotation = rotation;
+                }
+            }
+        }
+
+        function applyLayout() {
+            if (layout === 'pinterest') {
+                generatePinterestLayout();
+            } else {
+                generateCollageLayout();
+            }
+        }
+
+        function createBorderButton(imgId, hasBorder) {
+            var btn = document.createElement('button');
+            btn.className = 'border-btn';
+            btn.textContent = hasBorder ? '⚙️ Bordure' : '+ Bordure';
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                toggleBorderMenu(imgId, btn);
+            };
+            return btn;
+        }
+
+        function createRotateHandle(imgId) {
+            var rotateHandle = document.createElement('div');
+            rotateHandle.className = 'rotate-handle';
+            rotateHandle.innerHTML = '↻';
+            rotateHandle.onmousedown = function(e) {
+                e.stopPropagation();
+                startRotate(e, imgId);
+            };
+            return rotateHandle;
+        }
+
+        function renderMoodboard() {
+            var moodboard = document.getElementById('moodboard');
+            var emptyState = document.getElementById('emptyState');
+            
+            if (images.length === 0 && textElements.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+            }
+            
+            var existingItems = moodboard.querySelectorAll('.image-item, .text-item');
+            for (var i = 0; i < existingItems.length; i++) {
+                existingItems[i].remove();
+            }
+            
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                var div = document.createElement('div');
+                div.className = 'image-item';
+                div.style.left = img.x + 'px';
+                div.style.top = img.y + 'px';
+                div.style.width = img.width + 'px';
+                div.style.height = img.height + 'px';
+                if (img.rotation) {
+                    div.style.transform = 'rotate(' + img.rotation + 'deg)';
+                }
+                
+                if (img.border) {
+                    if (img.borderStyle === 'simple') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                    } else if (img.borderStyle === 'double') {
+                        div.style.border = '8px double ' + img.borderColor;
+                    } else if (img.borderStyle === 'shadow') {
+                        div.style.boxShadow = '0 0 0 8px ' + img.borderColor + ', 0 8px 25px rgba(0,0,0,0.3)';
+                    } else if (img.borderStyle === 'torn') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                        div.style.clipPath = 'polygon(0% 2%, 2% 0%, 5% 3%, 8% 1%, 12% 4%, 15% 0%, 18% 3%, 22% 1%, 25% 4%, 28% 2%, 32% 5%, 35% 1%, 38% 4%, 42% 2%, 45% 5%, 48% 1%, 52% 4%, 55% 2%, 58% 5%, 62% 1%, 65% 4%, 68% 2%, 72% 5%, 75% 1%, 78% 4%, 82% 2%, 85% 5%, 88% 1%, 92% 4%, 95% 2%, 98% 5%, 100% 2%, 98% 8%, 100% 12%, 97% 15%, 100% 18%, 98% 22%, 100% 25%, 97% 28%, 100% 32%, 98% 35%, 100% 38%, 97% 42%, 100% 45%, 98% 48%, 100% 52%, 97% 55%, 100% 58%, 98% 62%, 100% 65%, 97% 68%, 100% 72%, 98% 75%, 100% 78%, 97% 82%, 100% 85%, 98% 88%, 100% 92%, 97% 95%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 97%, 85% 100%, 82% 98%, 78% 100%, 75% 97%, 72% 100%, 68% 98%, 65% 100%, 62% 97%, 58% 100%, 55% 98%, 52% 100%, 48% 97%, 45% 100%, 42% 98%, 38% 100%, 35% 97%, 32% 100%, 28% 98%, 25% 100%, 22% 97%, 18% 100%, 15% 98%, 12% 100%, 8% 97%, 5% 100%, 2% 98%, 0% 95%, 2% 92%, 0% 88%, 3% 85%, 0% 82%, 2% 78%, 0% 75%, 3% 72%, 0% 68%, 2% 65%, 0% 62%, 3% 58%, 0% 55%, 2% 52%, 0% 48%, 3% 45%, 0% 42%, 2% 38%, 0% 35%, 3% 32%, 0% 28%, 2% 25%, 0% 22%, 3% 18%, 0% 15%, 2% 12%, 0% 8%, 3% 5%)';
+                    } else if (img.borderStyle === 'vintage') {
+                        div.style.border = '12px solid ' + img.borderColor;
+                        div.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3)';
+                    }
+                }
+                
+                var imgEl = document.createElement('img');
+                imgEl.src = img.src;
+                div.appendChild(imgEl);
+                
+                var btn = createBorderButton(img.id, img.border);
+                div.appendChild(btn);
+                
+                if (layout === 'collage') {
+                    var rotateHandle = createRotateHandle(img.id);
+                    div.appendChild(rotateHandle);
+                }
+                
+                div.setAttribute('data-id', img.id);
+                div.setAttribute('data-type', 'image');
+                div.onmousedown = startDragHandler;
+                
+                moodboard.appendChild(div);
+            }
+            
+            for (var i = 0; i < textElements.length; i++) {
+                var txt = textElements[i];
+                var div = document.createElement('div');
+                div.className = 'text-item';
+                div.style.left = txt.x + 'px';
+                div.style.top = txt.y + 'px';
+                
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.value = txt.content;
+                input.setAttribute('data-text-id', txt.id);
+                input.oninput = function(e) {
+                    var textId = parseFloat(this.getAttribute('data-text-id'));
+                    for (var j = 0; j < textElements.length; j++) {
+                        if (textElements[j].id === textId) {
+                            textElements[j].content = e.target.value;
+                            break;
+                        }
+                    }
+                };
+                div.appendChild(input);
+                
+                div.setAttribute('data-id', txt.id);
+                div.setAttribute('data-type', 'text');
+                div.onmousedown = startDragHandler;
+                
+                moodboard.appendChild(div);
+            }
+        }
+
+        function startDragHandler(e) {
+            var itemId = parseFloat(this.getAttribute('data-id'));
+            var itemType = this.getAttribute('data-type');
+            
+            var item = null;
+            if (itemType === 'image') {
+                for (var i = 0; i < images.length; i++) {
+                    if (images[i].id === itemId) {
+                        item = images[i];
+                        break;
+                    }
+                }
+            } else {
+                for (var i = 0; i < textElements.length; i++) {
+                    if (textElements[i].id === itemId) {
+                        item = textElements[i];
+                        break;
+                    }
+                }
+            }
+            
+            if (item) {
+                draggedElement = { item: item, type: itemType };
+                var moodboard = document.getElementById('moodboard');
+                var rect = moodboard.getBoundingClientRect();
+                offsetX = e.clientX - rect.left - item.x;
+                offsetY = e.clientY - rect.top - item.y;
+                this.classList.add('dragging');
+            }
+        }
+
+        function toggleBorderMenu(id, buttonElement) {
+            var existingMenu = document.querySelector('.border-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+            }
+            
+            var targetImg = null;
+            for (var i = 0; i < images.length; i++) {
+                if (images[i].id === id) {
+                    targetImg = images[i];
+                    break;
+                }
+            }
+            
+            if (!targetImg) return;
+            
+            if (!targetImg.border) {
+                targetImg.border = true;
+                targetImg.borderStyle = 'simple';
+                targetImg.borderColor = '#ffffff';
+                renderMoodboard();
+                return;
+            }
+            
+            var menu = document.createElement('div');
+            menu.className = 'border-menu';
+            menu.onclick = function(e) {
+                e.stopPropagation();
+            };
+            
+            var title = document.createElement('div');
+            title.className = 'border-menu-title';
+            title.textContent = 'Style de bordure';
+            menu.appendChild(title);
+            
+            var styles = [
+                { value: 'none', label: 'Aucune bordure' },
+                { value: 'simple', label: 'Simple' },
+                { value: 'double', label: 'Double' },
+                { value: 'shadow', label: 'Avec ombre' },
+                { value: 'torn', label: 'Déchirée' },
+                { value: 'vintage', label: 'Vintage' }
+            ];
+            
+            for (var j = 0; j < styles.length; j++) {
+                var styleValue = styles[j].value;
+                var styleLabel = styles[j].label;
+                
+                var option = document.createElement('div');
+                option.className = 'border-option';
+                
+                var radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'borderStyle';
+                radio.value = styleValue;
+                if ((styleValue === 'none' && !targetImg.border) || 
+                    (targetImg.border && targetImg.borderStyle === styleValue)) {
+                    radio.checked = true;
+                }
+                radio.setAttribute('data-img-id', id);
+                radio.setAttribute('data-style', styleValue);
+                radio.onchange = function() {
+                    var imgId = parseFloat(this.getAttribute('data-img-id'));
+                    var style = this.getAttribute('data-style');
+                    for (var k = 0; k < images.length; k++) {
+                        if (images[k].id === imgId) {
+                            if (style === 'none') {
+                                images[k].border = false;
+                            } else {
+                                images[k].border = true;
+                                images[k].borderStyle = style;
+                            }
+                            renderMoodboard();
+                            break;
+                        }
+                    }
+                };
+                
+                var label = document.createElement('label');
+                label.textContent = styleLabel;
+                label.style.cursor = 'pointer';
+                label.style.fontSize = '12px';
+                
+                option.appendChild(radio);
+                option.appendChild(label);
+                menu.appendChild(option);
+            }
+            
+            if
