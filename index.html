@@ -7,312 +7,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 20px;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: transform 0.2s;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-upload {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(102,126,234,0.3);
-        }
-
-        .btn-text {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 2px 10px rgba(245,87,108,0.3);
-        }
-
-        .btn-shuffle {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            box-shadow: 0 2px 10px rgba(79,172,254,0.3);
-        }
-
-        .btn-download {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            box-shadow: 0 2px 10px rgba(67,233,123,0.3);
-        }
-
-        .btn-clear {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            box-shadow: 0 2px 10px rgba(250,112,154,0.3);
-        }
-
-        .settings {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .setting-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .setting-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .setting-group input[type="color"] {
-            width: 100%;
-            height: 45px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .setting-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
-            background-color: white;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        #moodboard {
-            position: relative;
-            width: 100%;
-            height: 700px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            background-color: #f5f5f5;
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #a0aec0;
-        }
-
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            stroke-width: 1.5;
-        }
-
-        .empty-state p {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-
-        .image-item {
-            position: absolute;
-            cursor: grab;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border-radius: 8px;
-            transition: box-shadow 0.2s;
-        }
-
-        .image-item:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .image-item.dragging {
-            cursor: grabbing;
-        }
-
-        .image-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
-        .border-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            font-family: 'Poppins', sans-serif;
-            z-index: 10;
-        }
-
-        .rotate-handle {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 30px;
-            height: 30px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            border-radius: 50%;
-            cursor: grab;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 10;
-            font-size: 18px;
-        }
-
-        .rotate-handle:active {
-            cursor: grabbing;
-        }
-
-        .border-menu {
-            position: absolute;
-            top: 40px;
-            right: 8px;
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 20;
-            min-width: 200px;
-        }
-
-        .border-menu-title {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2d3748;
-        }
-
-        .border-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 5px;
-            transition: background 0.2s;
-        }
-
-        .border-option:hover {
-            background: #f7fafc;
-        }
-
-        .border-option input[type="radio"] {
-            cursor: pointer;
-        }
-
-        .color-picker-wrapper {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .color-picker-label {
-            font-size: 11px;
-            color: #4a5568;
-            margin-bottom: 5px;
-        }
-
-        .color-picker-wrapper input[type="color"] {
-            width: 100%;
-            height: 35px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .text-item {
-            position: absolute;
-            cursor: grab;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .text-item.dragging {
-            cursor: grabbing;
-        }
-
-        .text-item input {
-            border: none;
-            background: transparent;
-            font-size: 24px;
-            color: #000000;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            outline: none;
-            min-width: 150px;
-            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
-        }
-
-        .hidden {
-            display: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #fef5f0 0%, #f0f4f8 100%); border-radius: 20px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        .header h1 { font-size: 32px; font-weight: 600; color: #2d3748; margin-bottom: 10px; }
+        .header p { color: #718096; font-size: 14px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 500; transition: transform 0.2s; font-family: 'Poppins', sans-serif; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-upload { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 2px 10px rgba(102,126,234,0.3); }
+        .btn-text { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 2px 10px rgba(245,87,108,0.3); }
+        .btn-shuffle { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 2px 10px rgba(79,172,254,0.3); }
+        .btn-download { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); box-shadow: 0 2px 10px rgba(67,233,123,0.3); }
+        .btn-clear { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); box-shadow: 0 2px 10px rgba(250,112,154,0.3); }
+        .settings { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .setting-group { flex: 1; min-width: 200px; }
+        .setting-group label { display: block; margin-bottom: 8px; color: #4a5568; font-size: 14px; font-weight: 500; }
+        .setting-group input[type="color"] { width: 100%; height: 45px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; }
+        .setting-group select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; cursor: pointer; background-color: white; font-family: 'Poppins', sans-serif; }
+        #moodboard { position: relative; width: 100%; height: 700px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.12); background-color: #f5f5f5; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #a0aec0; }
+        .empty-state svg { width: 64px; height: 64px; stroke-width: 1.5; }
+        .empty-state p { margin-top: 20px; font-size: 18px; }
+        .image-item { position: absolute; cursor: grab; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; transition: box-shadow 0.2s; }
+        .image-item:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .image-item.dragging { cursor: grabbing; }
+        .image-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; pointer-events: none; }
+        .border-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 11px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif; z-index: 10; }
+        .rotate-handle { position: absolute; bottom: 8px; right: 8px; width: 30px; height: 30px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; cursor: grab; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10; font-size: 18px; }
+        .rotate-handle:active { cursor: grabbing; }
+        .border-menu { position: absolute; top: 40px; right: 8px; background: white; border-radius: 10px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 20; min-width: 200px; }
+        .border-menu-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: #2d3748; }
+        .border-option { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; padding: 5px; border-radius: 5px; transition: background 0.2s; }
+        .border-option:hover { background: #f7fafc; }
+        .border-option input[type="radio"] { cursor: pointer; }
+        .color-picker-wrapper { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+        .color-picker-label { font-size: 11px; color: #4a5568; margin-bottom: 5px; }
+        .color-picker-wrapper input[type="color"] { width: 100%; height: 35px; border: 2px solid #e2e8f0; border-radius: 6px; cursor: pointer; }
+        .text-item { position: absolute; cursor: grab; padding: 10px; border-radius: 8px; }
+        .text-item.dragging { cursor: grabbing; }
+        .text-item input { border: none; background: transparent; font-size: 24px; color: #000000; font-family: 'Poppins', sans-serif; font-weight: 600; outline: none; min-width: 150px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -321,7 +57,6 @@
             <h1>Générateur de Moodboard</h1>
             <p>Créez votre tableau d'inspiration couture</p>
         </div>
-
         <div class="controls">
             <button class="btn btn-upload" onclick="triggerFileInput()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -332,7 +67,6 @@
                 Ajouter des images
             </button>
             <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
-
             <button class="btn btn-text" onclick="addText()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="4 7 4 4 20 4 20 7"></polyline>
@@ -341,7 +75,6 @@
                 </svg>
                 Ajouter du texte
             </button>
-
             <button class="btn btn-shuffle" onclick="shuffleLayout()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="16 3 21 3 21 8"></polyline>
@@ -352,7 +85,6 @@
                 </svg>
                 Mélanger
             </button>
-
             <button class="btn btn-download" onclick="downloadMoodboard()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -361,7 +93,6 @@
                 </svg>
                 Télécharger
             </button>
-
             <button class="btn btn-clear" onclick="clearMoodboard()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -370,13 +101,11 @@
                 Vider
             </button>
         </div>
-
         <div class="settings">
             <div class="setting-group">
                 <label>Couleur de fond</label>
                 <input type="color" id="bgColor" value="#f5f5f5" onchange="updateBackground()">
             </div>
-
             <div class="setting-group">
                 <label>Style de disposition</label>
                 <select id="layoutSelect" onchange="changeLayout()">
@@ -385,7 +114,6 @@
                 </select>
             </div>
         </div>
-
         <div id="moodboard">
             <div class="empty-state" id="emptyState">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -397,7 +125,6 @@
             </div>
         </div>
     </div>
-
     <script>
         var images = [];
         var textElements = [];
@@ -415,8 +142,7 @@
         }
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            var files = Array.prototype.slice.call(e.target.files);
-            
+            var files = e.target.files;
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
                 var reader = new FileReader();
@@ -446,13 +172,11 @@
             var columns = 3;
             var gap = 15;
             var columnWidth = 280;
-            
             for (var i = 0; i < images.length; i++) {
                 var img = images[i];
                 var col = i % columns;
                 var row = Math.floor(i / columns);
                 var randomHeight = 200 + Math.random() * 150;
-                
                 img.x = col * (columnWidth + gap) + 20;
                 img.y = row * 250 + 20;
                 img.width = columnWidth;
@@ -465,51 +189,280 @@
             var containerWidth = 900;
             var containerHeight = 600;
             var positions = [];
-            
             for (var i = 0; i < images.length; i++) {
                 var img = images[i];
                 var x, y, width, height, rotation, attempts = 0;
                 var overlapping = true;
-                
                 while (overlapping && attempts < 50) {
                     width = 150 + Math.random() * 150;
                     height = 150 + Math.random() * 150;
                     x = Math.random() * (containerWidth - width - 40) + 20;
                     y = Math.random() * (containerHeight - height - 40) + 20;
                     rotation = (Math.random() - 0.5) * 20;
-                    
                     overlapping = false;
                     for (var j = 0; j < positions.length; j++) {
                         var pos = positions[j];
-                        if (targetImg.border) {
+                        if (!(x + width < pos.x || x > pos.x + pos.width || y + height < pos.y || y > pos.y + pos.height)) {
+                            overlapping = true;
+                            break;
+                        }
+                    }
+                    attempts++;
+                }
+                if (!overlapping || attempts === 50) {
+                    positions.push({ x: x, y: y, width: width, height: height });
+                    img.x = x;
+                    img.y = y;
+                    img.width = width;
+                    img.height = height;
+                    img.rotation = rotation;
+                }
+            }
+        }
+
+        function applyLayout() {
+            if (layout === 'pinterest') {
+                generatePinterestLayout();
+            } else {
+                generateCollageLayout();
+            }
+        }
+
+        function renderMoodboard() {
+            var moodboard = document.getElementById('moodboard');
+            var emptyState = document.getElementById('emptyState');
+            if (images.length === 0 && textElements.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+            }
+            var existingItems = moodboard.querySelectorAll('.image-item, .text-item');
+            for (var i = 0; i < existingItems.length; i++) {
+                existingItems[i].remove();
+            }
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                var div = document.createElement('div');
+                div.className = 'image-item';
+                div.style.left = img.x + 'px';
+                div.style.top = img.y + 'px';
+                div.style.width = img.width + 'px';
+                div.style.height = img.height + 'px';
+                if (img.rotation) {
+                    div.style.transform = 'rotate(' + img.rotation + 'deg)';
+                }
+                if (img.border) {
+                    if (img.borderStyle === 'simple') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                    } else if (img.borderStyle === 'double') {
+                        div.style.border = '8px double ' + img.borderColor;
+                    } else if (img.borderStyle === 'shadow') {
+                        div.style.boxShadow = '0 0 0 8px ' + img.borderColor + ', 0 8px 25px rgba(0,0,0,0.3)';
+                    } else if (img.borderStyle === 'torn') {
+                        div.style.border = '8px solid ' + img.borderColor;
+                        div.style.clipPath = 'polygon(0% 2%, 2% 0%, 5% 3%, 8% 1%, 12% 4%, 15% 0%, 18% 3%, 22% 1%, 25% 4%, 28% 2%, 32% 5%, 35% 1%, 38% 4%, 42% 2%, 45% 5%, 48% 1%, 52% 4%, 55% 2%, 58% 5%, 62% 1%, 65% 4%, 68% 2%, 72% 5%, 75% 1%, 78% 4%, 82% 2%, 85% 5%, 88% 1%, 92% 4%, 95% 2%, 98% 5%, 100% 2%, 98% 8%, 100% 12%, 97% 15%, 100% 18%, 98% 22%, 100% 25%, 97% 28%, 100% 32%, 98% 35%, 100% 38%, 97% 42%, 100% 45%, 98% 48%, 100% 52%, 97% 55%, 100% 58%, 98% 62%, 100% 65%, 97% 68%, 100% 72%, 98% 75%, 100% 78%, 97% 82%, 100% 85%, 98% 88%, 100% 92%, 97% 95%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 97%, 85% 100%, 82% 98%, 78% 100%, 75% 97%, 72% 100%, 68% 98%, 65% 100%, 62% 97%, 58% 100%, 55% 98%, 52% 100%, 48% 97%, 45% 100%, 42% 98%, 38% 100%, 35% 97%, 32% 100%, 28% 98%, 25% 100%, 22% 97%, 18% 100%, 15% 98%, 12% 100%, 8% 97%, 5% 100%, 2% 98%, 0% 95%, 2% 92%, 0% 88%, 3% 85%, 0% 82%, 2% 78%, 0% 75%, 3% 72%, 0% 68%, 2% 65%, 0% 62%, 3% 58%, 0% 55%, 2% 52%, 0% 48%, 3% 45%, 0% 42%, 2% 38%, 0% 35%, 3% 32%, 0% 28%, 2% 25%, 0% 22%, 3% 18%, 0% 15%, 2% 12%, 0% 8%, 3% 5%)';
+                    } else if (img.borderStyle === 'vintage') {
+                        div.style.border = '12px solid ' + img.borderColor;
+                        div.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3)';
+                    }
+                }
+                var imgEl = document.createElement('img');
+                imgEl.src = img.src;
+                div.appendChild(imgEl);
+                var btn = document.createElement('button');
+                btn.className = 'border-btn';
+                btn.textContent = img.border ? '⚙️ Bordure' : '+ Bordure';
+                btn.setAttribute('data-imgid', img.id);
+                btn.onclick = handleBorderClick;
+                div.appendChild(btn);
+                if (layout === 'collage') {
+                    var rotateHandle = document.createElement('div');
+                    rotateHandle.className = 'rotate-handle';
+                    rotateHandle.innerHTML = '↻';
+                    rotateHandle.setAttribute('data-imgid', img.id);
+                    rotateHandle.onmousedown = handleRotateStart;
+                    div.appendChild(rotateHandle);
+                }
+                div.setAttribute('data-id', img.id);
+                div.setAttribute('data-type', 'image');
+                div.onmousedown = startDragHandler;
+                moodboard.appendChild(div);
+            }
+            for (var i = 0; i < textElements.length; i++) {
+                var txt = textElements[i];
+                var div = document.createElement('div');
+                div.className = 'text-item';
+                div.style.left = txt.x + 'px';
+                div.style.top = txt.y + 'px';
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.value = txt.content;
+                input.setAttribute('data-textid', txt.id);
+                input.oninput = handleTextInput;
+                div.appendChild(input);
+                div.setAttribute('data-id', txt.id);
+                div.setAttribute('data-type', 'text');
+                div.onmousedown = startDragHandler;
+                moodboard.appendChild(div);
+            }
+        }
+
+        function handleBorderClick(e) {
+            e.stopPropagation();
+            var imgId = parseFloat(this.getAttribute('data-imgid'));
+            toggleBorderMenu(imgId, this);
+        }
+
+        function handleRotateStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var imgId = parseFloat(this.getAttribute('data-imgid'));
+            startRotate(e, imgId);
+        }
+
+        function handleTextInput(e) {
+            var textId = parseFloat(this.getAttribute('data-textid'));
+            for (var j = 0; j < textElements.length; j++) {
+                if (textElements[j].id === textId) {
+                    textElements[j].content = e.target.value;
+                    break;
+                }
+            }
+        }
+
+        function startDragHandler(e) {
+            var itemId = parseFloat(this.getAttribute('data-id'));
+            var itemType = this.getAttribute('data-type');
+            var item = null;
+            if (itemType === 'image') {
+                for (var i = 0; i < images.length; i++) {
+                    if (images[i].id === itemId) {
+                        item = images[i];
+                        break;
+                    }
+                }
+            } else {
+                for (var i = 0; i < textElements.length; i++) {
+                    if (textElements[i].id === itemId) {
+                        item = textElements[i];
+                        break;
+                    }
+                }
+            }
+            if (item) {
+                draggedElement = { item: item, type: itemType };
+                var moodboard = document.getElementById('moodboard');
+                var rect = moodboard.getBoundingClientRect();
+                offsetX = e.clientX - rect.left - item.x;
+                offsetY = e.clientY - rect.top - item.y;
+                this.classList.add('dragging');
+            }
+        }
+
+        function toggleBorderMenu(id, buttonElement) {
+            var existingMenu = document.querySelector('.border-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+            }
+            var targetImg = null;
+            for (var i = 0; i < images.length; i++) {
+                if (images[i].id === id) {
+                    targetImg = images[i];
+                    break;
+                }
+            }
+            if (!targetImg) return;
+            if (!targetImg.border) {
+                targetImg.border = true;
+                targetImg.borderStyle = 'simple';
+                targetImg.borderColor = '#ffffff';
+                renderMoodboard();
+                return;
+            }
+            var menu = document.createElement('div');
+            menu.className = 'border-menu';
+            menu.onclick = function(e) {
+                e.stopPropagation();
+            };
+            var title = document.createElement('div');
+            title.className = 'border-menu-title';
+            title.textContent = 'Style de bordure';
+            menu.appendChild(title);
+            var styles = [
+                { value: 'none', label: 'Aucune bordure' },
+                { value: 'simple', label: 'Simple' },
+                { value: 'double', label: 'Double' },
+                { value: 'shadow', label: 'Avec ombre' },
+                { value: 'torn', label: 'Déchirée' },
+                { value: 'vintage', label: 'Vintage' }
+            ];
+            for (var j = 0; j < styles.length; j++) {
+                var option = document.createElement('div');
+                option.className = 'border-option';
+                var radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'borderStyle';
+                radio.value = styles[j].value;
+                radio.setAttribute('data-imgid', id);
+                radio.setAttribute('data-styleval', styles[j].value);
+                if ((styles[j].value === 'none' && !targetImg.border) || (targetImg.border && targetImg.borderStyle === styles[j].value)) {
+                    radio.checked = true;
+                }
+                radio.onchange = handleBorderStyleChange;
+                var label = document.createElement('label');
+                label.textContent = styles[j].label;
+                label.style.cursor = 'pointer';
+                label.style.fontSize = '12px';
+                option.appendChild(radio);
+                option.appendChild(label);
+                menu.appendChild(option);
+            }
+            if (targetImg.border) {
                 var colorWrapper = document.createElement('div');
                 colorWrapper.className = 'color-picker-wrapper';
-                
                 var colorLabel = document.createElement('div');
                 colorLabel.className = 'color-picker-label';
                 colorLabel.textContent = 'Couleur de bordure';
                 colorWrapper.appendChild(colorLabel);
-                
                 var colorInput = document.createElement('input');
                 colorInput.type = 'color';
                 colorInput.value = targetImg.borderColor || '#ffffff';
-                colorInput.setAttribute('data-img-id', id);
-                colorInput.onchange = function() {
-                    var imgId = parseFloat(this.getAttribute('data-img-id'));
-                    for (var k = 0; k < images.length; k++) {
-                        if (images[k].id === imgId) {
-                            images[k].borderColor = this.value;
-                            renderMoodboard();
-                            break;
-                        }
-                    }
-                };
+                colorInput.setAttribute('data-imgid', id);
+                colorInput.onchange = handleBorderColorChange;
                 colorWrapper.appendChild(colorInput);
                 menu.appendChild(colorWrapper);
             }
-            
-            var imageItem = buttonElement.closest('.image-item');
+            var imageItem = buttonElement.parentNode;
             imageItem.appendChild(menu);
+        }
+
+        function handleBorderStyleChange() {
+            var imgId = parseFloat(this.getAttribute('data-imgid'));
+            var styleVal = this.getAttribute('data-styleval');
+            for (var k = 0; k < images.length; k++) {
+                if (images[k].id === imgId) {
+                    if (styleVal === 'none') {
+                        images[k].border = false;
+                    } else {
+                        images[k].border = true;
+                        images[k].borderStyle = styleVal;
+                    }
+                    renderMoodboard();
+                    break;
+                }
+            }
+        }
+
+        function handleBorderColorChange() {
+            var imgId = parseFloat(this.getAttribute('data-imgid'));
+            var colorVal = this.value;
+            for (var k = 0; k < images.length; k++) {
+                if (images[k].id === imgId) {
+                    images[k].borderColor = colorVal;
+                    renderMoodboard();
+                    break;
+                }
+            }
         }
 
         document.addEventListener('click', function(e) {
@@ -522,23 +475,17 @@
         });
 
         function startRotate(e, imgId) {
-            e.preventDefault();
-            e.stopPropagation();
-            
             for (var i = 0; i < images.length; i++) {
                 if (images[i].id === imgId) {
                     rotatingImage = images[i];
                     centerX = rotatingImage.x + rotatingImage.width / 2;
                     centerY = rotatingImage.y + rotatingImage.height / 2;
-                    
                     var moodboard = document.getElementById('moodboard');
                     var rect = moodboard.getBoundingClientRect();
                     var mouseX = e.clientX - rect.left;
                     var mouseY = e.clientY - rect.top;
-                    
                     startAngle = Math.atan2(mouseY - centerY, mouseX - centerX) * 180 / Math.PI;
                     startAngle -= rotatingImage.rotation || 0;
-                    
                     break;
                 }
             }
@@ -550,24 +497,18 @@
                 var rect = moodboard.getBoundingClientRect();
                 var mouseX = e.clientX - rect.left;
                 var mouseY = e.clientY - rect.top;
-                
                 var angle = Math.atan2(mouseY - centerY, mouseX - centerX) * 180 / Math.PI;
                 rotatingImage.rotation = angle - startAngle;
-                
                 renderMoodboard();
                 return;
             }
-            
             if (!draggedElement) return;
-            
             var moodboard = document.getElementById('moodboard');
             var rect = moodboard.getBoundingClientRect();
             var x = e.clientX - rect.left - offsetX;
             var y = e.clientY - rect.top - offsetY;
-            
             draggedElement.item.x = x;
             draggedElement.item.y = y;
-            
             renderMoodboard();
         });
 
@@ -575,7 +516,6 @@
             if (rotatingImage) {
                 rotatingImage = null;
             }
-            
             if (draggedElement) {
                 var dragging = document.querySelector('.dragging');
                 if (dragging) dragging.classList.remove('dragging');
@@ -619,7 +559,6 @@
         function downloadMoodboard() {
             var moodboard = document.getElementById('moodboard');
             var bgColor = document.getElementById('bgColor').value;
-            
             html2canvas(moodboard, {
                 backgroundColor: bgColor,
                 scale: 2
@@ -632,266 +571,4 @@
         }
     </script>
 </body>
-</html> (!(x + width < pos.x || x > pos.x + pos.width ||
-                              y + height < pos.y || y > pos.y + pos.height)) {
-                            overlapping = true;
-                            break;
-                        }
-                    }
-                    
-                    attempts++;
-                }
-                
-                if (!overlapping || attempts === 50) {
-                    positions.push({ x: x, y: y, width: width, height: height });
-                    img.x = x;
-                    img.y = y;
-                    img.width = width;
-                    img.height = height;
-                    img.rotation = rotation;
-                }
-            }
-        }
-
-        function applyLayout() {
-            if (layout === 'pinterest') {
-                generatePinterestLayout();
-            } else {
-                generateCollageLayout();
-            }
-        }
-
-        function createBorderButton(imgId, hasBorder) {
-            var btn = document.createElement('button');
-            btn.className = 'border-btn';
-            btn.textContent = hasBorder ? '⚙️ Bordure' : '+ Bordure';
-            btn.onclick = function(e) {
-                e.stopPropagation();
-                toggleBorderMenu(imgId, btn);
-            };
-            return btn;
-        }
-
-        function createRotateHandle(imgId) {
-            var rotateHandle = document.createElement('div');
-            rotateHandle.className = 'rotate-handle';
-            rotateHandle.innerHTML = '↻';
-            rotateHandle.onmousedown = function(e) {
-                e.stopPropagation();
-                startRotate(e, imgId);
-            };
-            return rotateHandle;
-        }
-
-        function renderMoodboard() {
-            var moodboard = document.getElementById('moodboard');
-            var emptyState = document.getElementById('emptyState');
-            
-            if (images.length === 0 && textElements.length === 0) {
-                emptyState.style.display = 'flex';
-            } else {
-                emptyState.style.display = 'none';
-            }
-            
-            var existingItems = moodboard.querySelectorAll('.image-item, .text-item');
-            for (var i = 0; i < existingItems.length; i++) {
-                existingItems[i].remove();
-            }
-            
-            for (var i = 0; i < images.length; i++) {
-                var img = images[i];
-                var div = document.createElement('div');
-                div.className = 'image-item';
-                div.style.left = img.x + 'px';
-                div.style.top = img.y + 'px';
-                div.style.width = img.width + 'px';
-                div.style.height = img.height + 'px';
-                if (img.rotation) {
-                    div.style.transform = 'rotate(' + img.rotation + 'deg)';
-                }
-                
-                if (img.border) {
-                    if (img.borderStyle === 'simple') {
-                        div.style.border = '8px solid ' + img.borderColor;
-                    } else if (img.borderStyle === 'double') {
-                        div.style.border = '8px double ' + img.borderColor;
-                    } else if (img.borderStyle === 'shadow') {
-                        div.style.boxShadow = '0 0 0 8px ' + img.borderColor + ', 0 8px 25px rgba(0,0,0,0.3)';
-                    } else if (img.borderStyle === 'torn') {
-                        div.style.border = '8px solid ' + img.borderColor;
-                        div.style.clipPath = 'polygon(0% 2%, 2% 0%, 5% 3%, 8% 1%, 12% 4%, 15% 0%, 18% 3%, 22% 1%, 25% 4%, 28% 2%, 32% 5%, 35% 1%, 38% 4%, 42% 2%, 45% 5%, 48% 1%, 52% 4%, 55% 2%, 58% 5%, 62% 1%, 65% 4%, 68% 2%, 72% 5%, 75% 1%, 78% 4%, 82% 2%, 85% 5%, 88% 1%, 92% 4%, 95% 2%, 98% 5%, 100% 2%, 98% 8%, 100% 12%, 97% 15%, 100% 18%, 98% 22%, 100% 25%, 97% 28%, 100% 32%, 98% 35%, 100% 38%, 97% 42%, 100% 45%, 98% 48%, 100% 52%, 97% 55%, 100% 58%, 98% 62%, 100% 65%, 97% 68%, 100% 72%, 98% 75%, 100% 78%, 97% 82%, 100% 85%, 98% 88%, 100% 92%, 97% 95%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 97%, 85% 100%, 82% 98%, 78% 100%, 75% 97%, 72% 100%, 68% 98%, 65% 100%, 62% 97%, 58% 100%, 55% 98%, 52% 100%, 48% 97%, 45% 100%, 42% 98%, 38% 100%, 35% 97%, 32% 100%, 28% 98%, 25% 100%, 22% 97%, 18% 100%, 15% 98%, 12% 100%, 8% 97%, 5% 100%, 2% 98%, 0% 95%, 2% 92%, 0% 88%, 3% 85%, 0% 82%, 2% 78%, 0% 75%, 3% 72%, 0% 68%, 2% 65%, 0% 62%, 3% 58%, 0% 55%, 2% 52%, 0% 48%, 3% 45%, 0% 42%, 2% 38%, 0% 35%, 3% 32%, 0% 28%, 2% 25%, 0% 22%, 3% 18%, 0% 15%, 2% 12%, 0% 8%, 3% 5%)';
-                    } else if (img.borderStyle === 'vintage') {
-                        div.style.border = '12px solid ' + img.borderColor;
-                        div.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3)';
-                    }
-                }
-                
-                var imgEl = document.createElement('img');
-                imgEl.src = img.src;
-                div.appendChild(imgEl);
-                
-                var btn = createBorderButton(img.id, img.border);
-                div.appendChild(btn);
-                
-                if (layout === 'collage') {
-                    var rotateHandle = createRotateHandle(img.id);
-                    div.appendChild(rotateHandle);
-                }
-                
-                div.setAttribute('data-id', img.id);
-                div.setAttribute('data-type', 'image');
-                div.onmousedown = startDragHandler;
-                
-                moodboard.appendChild(div);
-            }
-            
-            for (var i = 0; i < textElements.length; i++) {
-                var txt = textElements[i];
-                var div = document.createElement('div');
-                div.className = 'text-item';
-                div.style.left = txt.x + 'px';
-                div.style.top = txt.y + 'px';
-                
-                var input = document.createElement('input');
-                input.type = 'text';
-                input.value = txt.content;
-                input.setAttribute('data-text-id', txt.id);
-                input.oninput = function(e) {
-                    var textId = parseFloat(this.getAttribute('data-text-id'));
-                    for (var j = 0; j < textElements.length; j++) {
-                        if (textElements[j].id === textId) {
-                            textElements[j].content = e.target.value;
-                            break;
-                        }
-                    }
-                };
-                div.appendChild(input);
-                
-                div.setAttribute('data-id', txt.id);
-                div.setAttribute('data-type', 'text');
-                div.onmousedown = startDragHandler;
-                
-                moodboard.appendChild(div);
-            }
-        }
-
-        function startDragHandler(e) {
-            var itemId = parseFloat(this.getAttribute('data-id'));
-            var itemType = this.getAttribute('data-type');
-            
-            var item = null;
-            if (itemType === 'image') {
-                for (var i = 0; i < images.length; i++) {
-                    if (images[i].id === itemId) {
-                        item = images[i];
-                        break;
-                    }
-                }
-            } else {
-                for (var i = 0; i < textElements.length; i++) {
-                    if (textElements[i].id === itemId) {
-                        item = textElements[i];
-                        break;
-                    }
-                }
-            }
-            
-            if (item) {
-                draggedElement = { item: item, type: itemType };
-                var moodboard = document.getElementById('moodboard');
-                var rect = moodboard.getBoundingClientRect();
-                offsetX = e.clientX - rect.left - item.x;
-                offsetY = e.clientY - rect.top - item.y;
-                this.classList.add('dragging');
-            }
-        }
-
-        function toggleBorderMenu(id, buttonElement) {
-            var existingMenu = document.querySelector('.border-menu');
-            if (existingMenu) {
-                existingMenu.remove();
-            }
-            
-            var targetImg = null;
-            for (var i = 0; i < images.length; i++) {
-                if (images[i].id === id) {
-                    targetImg = images[i];
-                    break;
-                }
-            }
-            
-            if (!targetImg) return;
-            
-            if (!targetImg.border) {
-                targetImg.border = true;
-                targetImg.borderStyle = 'simple';
-                targetImg.borderColor = '#ffffff';
-                renderMoodboard();
-                return;
-            }
-            
-            var menu = document.createElement('div');
-            menu.className = 'border-menu';
-            menu.onclick = function(e) {
-                e.stopPropagation();
-            };
-            
-            var title = document.createElement('div');
-            title.className = 'border-menu-title';
-            title.textContent = 'Style de bordure';
-            menu.appendChild(title);
-            
-            var styles = [
-                { value: 'none', label: 'Aucune bordure' },
-                { value: 'simple', label: 'Simple' },
-                { value: 'double', label: 'Double' },
-                { value: 'shadow', label: 'Avec ombre' },
-                { value: 'torn', label: 'Déchirée' },
-                { value: 'vintage', label: 'Vintage' }
-            ];
-            
-            for (var j = 0; j < styles.length; j++) {
-                var styleValue = styles[j].value;
-                var styleLabel = styles[j].label;
-                
-                var option = document.createElement('div');
-                option.className = 'border-option';
-                
-                var radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'borderStyle';
-                radio.value = styleValue;
-                if ((styleValue === 'none' && !targetImg.border) || 
-                    (targetImg.border && targetImg.borderStyle === styleValue)) {
-                    radio.checked = true;
-                }
-                radio.setAttribute('data-img-id', id);
-                radio.setAttribute('data-style', styleValue);
-                radio.onchange = function() {
-                    var imgId = parseFloat(this.getAttribute('data-img-id'));
-                    var style = this.getAttribute('data-style');
-                    for (var k = 0; k < images.length; k++) {
-                        if (images[k].id === imgId) {
-                            if (style === 'none') {
-                                images[k].border = false;
-                            } else {
-                                images[k].border = true;
-                                images[k].borderStyle = style;
-                            }
-                            renderMoodboard();
-                            break;
-                        }
-                    }
-                };
-                
-                var label = document.createElement('label');
-                label.textContent = styleLabel;
-                label.style.cursor = 'pointer';
-                label.style.fontSize = '12px';
-                
-                option.appendChild(radio);
-                option.appendChild(label);
-                menu.appendChild(option);
-            }
-            
-            if
+</html>
