@@ -150,6 +150,9 @@
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             var files = e.target.files;
+            var fileCount = 0;
+            var totalFiles = files.length;
+            
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
                 var reader = new FileReader();
@@ -160,15 +163,18 @@
                         border: false,
                         borderStyle: 'simple',
                         borderColor: '#ffffff',
-                        x: 100,
-                        y: 100,
+                        x: 100 + Math.random() * 200,
+                        y: 100 + Math.random() * 200,
                         width: 200,
                         height: 200,
                         rotation: 0
                     };
                     images.push(img);
-                    applyLayout();
-                    renderMoodboard();
+                    fileCount++;
+                    if (fileCount === totalFiles) {
+                        applyLayout();
+                        renderMoodboard();
+                    }
                 };
                 reader.readAsDataURL(file);
             }
@@ -331,6 +337,13 @@
             e.stopPropagation();
             var imgId = parseFloat(this.getAttribute('data-imgid'));
             startRotate(e, imgId);
+        }
+
+        function handleResizeStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var imgId = parseFloat(this.getAttribute('data-imgid'));
+            startResize(e, imgId);
         }
 
         function handleTextInput(e) {
@@ -504,7 +517,37 @@
             }
         }
 
+        function startResize(e, imgId) {
+            for (var i = 0; i < images.length; i++) {
+                if (images[i].id === imgId) {
+                    resizingImage = images[i];
+                    startWidth = resizingImage.width;
+                    startHeight = resizingImage.height;
+                    var moodboard = document.getElementById('moodboard');
+                    var rect = moodboard.getBoundingClientRect();
+                    startMouseX = e.clientX - rect.left;
+                    startMouseY = e.clientY - rect.top;
+                    break;
+                }
+            }
+        }
+
         document.addEventListener('mousemove', function(e) {
+            if (resizingImage) {
+                var moodboard = document.getElementById('moodboard');
+                var rect = moodboard.getBoundingClientRect();
+                var mouseX = e.clientX - rect.left;
+                var mouseY = e.clientY - rect.top;
+                var deltaX = mouseX - startMouseX;
+                var deltaY = mouseY - startMouseY;
+                var avgDelta = (deltaX + deltaY) / 2;
+                var newWidth = Math.max(50, startWidth + avgDelta);
+                var newHeight = Math.max(50, startHeight + avgDelta);
+                resizingImage.width = newWidth;
+                resizingImage.height = newHeight;
+                renderMoodboard();
+                return;
+            }
             if (rotatingImage) {
                 var moodboard = document.getElementById('moodboard');
                 var rect = moodboard.getBoundingClientRect();
@@ -526,6 +569,9 @@
         });
 
         document.addEventListener('mouseup', function() {
+            if (resizingImage) {
+                resizingImage = null;
+            }
             if (rotatingImage) {
                 rotatingImage = null;
             }
